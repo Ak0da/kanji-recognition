@@ -1,3 +1,9 @@
+#Images created by the generator
+Training_set/
+*.jpg
+*.jpeg
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
