@@ -23,7 +23,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 detectionModel = kanji_detector().to(device=device).cpu()
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_98_1.pth'))
-detectionModel.load_state_dict(torch.load('./Models/kanji_model_top5_99_pertub.pth'))
+#detectionModel.load_state_dict(torch.load('./Models/kanji_model_top5_99_pertub.pth'))
+#detectionModel.load_state_dict(torch.load('./Models/kanji_model_v2_top5_96_pertub.pth'))
+detectionModel.load_state_dict(torch.load('./Models/kanji_model_v2_top5_98_pertub.pth'))
 
 def sortAccumulator(item):
     return item[1]
@@ -156,6 +158,8 @@ while True:
         print("Selected " + str(len(images_captured)) + " kanjis")
         kanjis = ""
         for images in images_captured:
+            if len(kanjis) > 0:
+                print("Selected so far : " + kanjis)
             selection = identifySymbol(top_k=5, images=images)
             kanji = validate_selection(selection)
             kanjis += kanji
