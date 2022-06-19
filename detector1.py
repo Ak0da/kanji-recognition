@@ -20,7 +20,8 @@ with open('num2kanji_dict.json', 'r') as f:
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 detectionModel = kanji_detector().to(device=device)
-detectionModel.load_state_dict(torch.load('./Models/kanji_model_98_1.pth'))
+#detectionModel.load_state_dict(torch.load('./Models/kanji_model_98_1.pth'))
+detectionModel.load_state_dict(torch.load('./Models/kanji_model_top5_99_pertub.pth'))
 
 def sortAccumulator(item):
     return item[1]
