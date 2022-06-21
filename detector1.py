@@ -26,7 +26,8 @@ detectionModel = kanji_detector().to(device=device).cpu()
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_top5_99_pertub.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v2_top5_96_pertub.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v2_top5_98_pertub.pth'))
-detectionModel.load_state_dict(torch.load('./Models/kanji_model_v3_top5_98_pertub.pth'))
+#detectionModel.load_state_dict(torch.load('./Models/kanji_model_v3_top5_98_pertub.pth'))
+detectionModel.load_state_dict(torch.load('./Models/kanji_model_v4_top5_90_eval.pth'))
 
 def sortAccumulator(item):
     return item[1]
@@ -54,7 +55,7 @@ def identifySymbol(top_k: int, images: Image):
     
     convert_tensor = transforms.Compose([
         transforms.Grayscale(),
-        transforms.Resize(64,antialias=transforms.InterpolationMode.BICUBIC),
+        transforms.Resize(64,interpolation=transforms.InterpolationMode.BICUBIC),
         transforms.ToTensor()
     ])
     
