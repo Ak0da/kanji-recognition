@@ -1,8 +1,11 @@
 #Images created by the generator
+Image_set/
 Training_set/
 *.jpg
 *.jpeg
 
+#Data file with images in the shape of numpy arrays
+*.hdf5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -135,11 +135,11 @@ def kanji_detector(nb_symbols=2199,dropout1=0.4, dropout2=0.2, dropout3=0.2):
 
 
 
-
+"""
 image_size = 64
 nb_symbols = 2199
     
-trainingPath = pathlib.Path().resolve() / "Training_set"
+trainingPath = pathlib.Path().resolve() / "Image_set"
 picturesNames = [f for f in listdir(trainingPath) if isfile(join(trainingPath, f))]
 
 dictNames = {name:{'number':int(name.split('_')[0]) , 'symbol':name.split('_')[1]} for name in picturesNames}
@@ -292,3 +292,4 @@ def eval(model, n_epoch, batch_size):
             print("Epoch " + str(epoch+1) +" evaluation accuracy : " + str(percent) + "%\n")
         
     return best_percent
+    """
