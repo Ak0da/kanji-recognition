@@ -29,7 +29,8 @@ detectionModel = kanji_detector().to(device=device).cpu()
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v3_top5_98_pertub.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v4_top5_90_eval.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v5_top5_88_eval.pth'))
-detectionModel.load_state_dict(torch.load('./Models/kanji_model_v6_top5_98_eval.pth'))
+#detectionModel.load_state_dict(torch.load('./Models/kanji_model_v6_top5_98_eval.pth'))
+detectionModel.load_state_dict(torch.load('./Models/kanji_model_v7_top5_96_eval.pth'))
 
 def sortAccumulator(item):
     return item[1]
