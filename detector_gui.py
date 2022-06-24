@@ -301,11 +301,11 @@ while isRunning:
         setButtonsInteractible(window,False)
         
         images_captured = MultiCaptureLoop()
-        windowToFront(window)
-        
-        list_images_captured.extend(images_captured)
         if not isRunning:
             break
+        
+        windowToFront(window)
+        list_images_captured.extend(images_captured)
             
         setButtonsInteractible(window,True)
         setInstructions(window,"Select the kanji you think you clicked on")
