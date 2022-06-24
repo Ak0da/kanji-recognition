@@ -60,6 +60,11 @@ def resetButtonTexts(window1):
 def setInstructions(window1,message:str):
     window1["Instructions"].update(message)
 
+def windowToFront(window1):
+    window.TKroot.attributes('-topmost', True)
+    window.TKroot.attributes('-topmost', False)
+    window.TKroot.focus_force()
+
 def loadModel() -> torch.nn.Module:
     detectionModel = kanji_detector().to(device=device)
     detectionModel.load_state_dict(torch.load('./Models/kanji_model_v7_top5_96_eval.pth'))
@@ -228,18 +233,19 @@ def identificationLoop(window1) -> bool:
             kanji_selected = True #Fake, but pops the images as intended
         
         if event == "Retake":
-            setInstructions(window1,"Select kanji somewhere on your screen")
+            setInstructions(window1,"Select kanji somewhere on your screen (Ctrl + Click)")
             
             setButtonsInteractible(window,False)
             images_captured = SingleCaptureLoop()
+            if not isRunning:
+                break
+                
             setButtonsInteractible(window,True)
+            windowToFront(window)
             setButtonsListInteractible(window,["Search"],len(kanjis)>0)
-            
             list_images_captured.insert(0, images_captured[0])
             kanji_selected = True
             
-            if not isRunning:
-                break
             
         try:
             index = int(event)
@@ -247,6 +253,7 @@ def identificationLoop(window1) -> bool:
                 kanjis += window1[event].get_text()
                 window1["Selection"].update("Currently selected : " + kanjis)
                 setButtonsListInteractible(window,["Search"],True)
+                resetButtonTexts(window1)
                 kanji_selected = True
         except:
             pass
@@ -255,14 +262,11 @@ def identificationLoop(window1) -> bool:
             list_images_captured.clear()
             kanjis = ""
             window1["Selection"].update("Currently selected : None")
-            return True
+            return
         
         if event == "Search" and len(kanjis) > 0:
             webbrowser.open("https://jisho.org/search/"+kanjis, new=2, autoraise=True)
-            
-    return False
-
-            
+    
             
             
 # Create the window
@@ -292,21 +296,24 @@ while isRunning:
         
     if isStartingCapture:
         resetButtonTexts(window)
-        setInstructions(window,"Select kanji(s) somewhere on your screen")
+        setInstructions(window,"Select kanji(s) somewhere on your screen (Ctrl + Click)")
         isStartingCapture = False
         setButtonsInteractible(window,False)
-        #print("In capture loop")
         
         images_captured = MultiCaptureLoop()
+        windowToFront(window)
+        
         list_images_captured.extend(images_captured)
         if not isRunning:
             break
             
-        #print("Out capture loop")
         setButtonsInteractible(window,True)
         setInstructions(window,"Select the kanji you think you clicked on")
         wasCancelled = identificationLoop(window)
-        isStartingCapture = wasCancelled
+        if not isRunning:
+            break
+        
+        resetButtonTexts(window)
         setInstructions(window,"Capture complete")
         setButtonsListInteractible(window,["Skip","Retake","0","1","2","3","4"],False)
     
