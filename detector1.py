@@ -21,7 +21,7 @@ with open('num2kanji_dict.json', 'r') as f:
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-detectionModel = kanji_detector().to(device=device).cpu()
+detectionModel = kanji_detector().to(device=device)
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_98_1.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_top5_99_pertub.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v2_top5_96_pertub.pth'))
@@ -31,6 +31,9 @@ detectionModel = kanji_detector().to(device=device).cpu()
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v5_top5_88_eval.pth'))
 #detectionModel.load_state_dict(torch.load('./Models/kanji_model_v6_top5_98_eval.pth'))
 detectionModel.load_state_dict(torch.load('./Models/kanji_model_v7_top5_96_eval.pth'))
+detectionModel(torch.rand((1,1,64,64)).float().to(device=device)) #Allocate memory in advance
+detectionModel = detectionModel.cpu() #Allocate memory in advance
+
 
 def sortAccumulator(item):
     return item[1]
