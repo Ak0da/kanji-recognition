@@ -18,11 +18,11 @@ layout = [
             [sg.Push(), sg.Text("Select kanji(s)", key="Instructions"), sg.Push()], 
     
             [sg.Push(), 
-             sg.Button("魔", key="0", size=(3,0), font=("Helvetica", 50)), 
-             sg.Button("", key="1", size=(3,0), font=("Helvetica", 50)), 
-             sg.Button("", key="2", size=(3,0), font=("Helvetica", 50)), 
-             sg.Button("", key="3", size=(3,0), font=("Helvetica", 50)), 
-             sg.Button("", key="4", size=(3,0), font=("Helvetica", 50)), 
+             sg.Button("X", key="0", size=(3,0), font=("Helvetica", 50)), 
+             sg.Button("X", key="1", size=(3,0), font=("Helvetica", 50)), 
+             sg.Button("X", key="2", size=(3,0), font=("Helvetica", 50)), 
+             sg.Button("X", key="3", size=(3,0), font=("Helvetica", 50)), 
+             sg.Button("X", key="4", size=(3,0), font=("Helvetica", 50)), 
              sg.Push()],
     
              [sg.Push(), sg.Text("Currently selected : ", key="Selection", font=("Helvetica", 20)), sg.Push()], 
@@ -272,8 +272,10 @@ def identificationLoop(window1) -> bool:
 # Create the window
 window = sg.Window("Kanji reader", layout, element_padding=(0,5))
 window.finalize()
+setButtonsInteractible(window,False)
 setInstructions(window,"Program is loading, please wait")
 window.force_focus()
+event, values = window.Read(timeout = 100)
 
 num2kanji_dict = {}
 with open('num2kanji_dict.json', 'r') as f:
@@ -284,7 +286,6 @@ detectionModel = loadModel()
 
 isRunning = True
 isStartingCapture = True
-setButtonsInteractible(window,False)
 # Create an event loop
 while isRunning:
     event, values = window.Read(timeout = 100)
