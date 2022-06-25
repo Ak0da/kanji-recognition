@@ -12,7 +12,8 @@ from torchvision import transforms
 from kanji_detection_model import kanji_detector
 
 isRunning = True
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
+# single images are fast enough that using cuda is pretty much useless. It just takes video memory.
 
 layout = [
             [sg.Push(), sg.Text("Select kanji(s)", key="Instructions"), sg.Push()], 
@@ -286,11 +287,8 @@ detectionModel = loadModel()
 
 isRunning = True
 isStartingCapture = True
-# Create an event loop
 while isRunning:
     event, values = window.Read(timeout = 100)
-    # End program if user closes window or
-    # presses the OK button
     
     if event == sg.WIN_CLOSED:
         break
