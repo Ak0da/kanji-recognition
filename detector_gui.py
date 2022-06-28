@@ -18,9 +18,9 @@ device = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
 all_settings = {
     'kanji' : {
         'script_name' : 'kanji',
-        'model_name':'./Models/kanji_model_v8_top5_96_eval.pth',
+        'model_name':'./Models/kanji_model_v9_top5_96_eval.pth',
         'array_path':'./Symbols/kanji_array.json',
-        'number_symbols' : 2199,
+        'number_symbols' : 2999,
         'search_address' : 'https://jisho.org/search/'
     },
     
@@ -33,7 +33,30 @@ all_settings = {
     }
 }
             
-settings = all_settings['hangul']
+settings = all_settings['kanji']
+
+sg.LOOK_AND_FEEL_TABLE['hangul'] = {'BACKGROUND': '#ff8FB2',
+                                        'TEXT': '#FFFFFF',
+                                        'INPUT': '#222222',
+                                        'TEXT_INPUT': '#FFFFFF',
+                                        'SCROLL': '#99CC99',
+                                        'BUTTON': ('#FFFFFF', '#000000'),
+                                        'PROGRESS': ('#D1826B', '#CC8019'),
+                                        'BORDER': 1, 'SLIDER_DEPTH': 0, 
+                                        'PROGRESS_DEPTH': 0
+                                    }
+sg.LOOK_AND_FEEL_TABLE['kanji'] = {'BACKGROUND': '#000000',
+                                        'TEXT': '#FFFFFF',
+                                        'INPUT': '#222222',
+                                        'TEXT_INPUT': '#FFFFFF',
+                                        'SCROLL': '#99CC99',
+                                        'BUTTON': ('#FFFFFF', '#0000AA'),
+                                        'PROGRESS': ('#D1826B', '#CC8019'),
+                                        'BORDER': 1, 'SLIDER_DEPTH': 0, 
+                                        'PROGRESS_DEPTH': 0
+                                    }
+
+sg.theme(settings['script_name'])
 
 layout = [
             [sg.Push(), sg.Text("Select symbol(s)", key="Instructions"), sg.Push()], 
@@ -243,7 +266,7 @@ def identificationLoop(window1):
             setButtonsListInteractible(window1,["Skip","Retake","0","1","2","3","4"],False)
             setButtonsListInteractible(window1,["Search","Cancel"],True)
         
-        setInstructions(window1,"Select the kanji you think you clicked on")
+        setInstructions(window1,"Select the symbol you think you clicked on")
         
         if kanji_selected:
             kanji_selected = False
@@ -259,7 +282,7 @@ def identificationLoop(window1):
             kanji_selected = True #Fake, but pops the images as intended
         
         if event == "Retake":
-            setInstructions(window1,"Select kanji somewhere on your screen (Ctrl + Click)")
+            setInstructions(window1,"Select symbol somewhere on your screen (Ctrl + Click)")
             
             setButtonsInteractible(window,False)
             images_captured = SingleCaptureLoop()
