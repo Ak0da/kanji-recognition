@@ -15,8 +15,28 @@ isRunning = True
 device = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
 # single images are fast enough that using cuda is pretty much useless. It just takes video memory.
 
+all_settings = {
+    'kanji' : {
+        'script_name' : 'kanji',
+        'model_name':'./Models/kanji_model_v8_top5_96_eval.pth',
+        'array_path':'./Symbols/kanji_array.json',
+        'number_symbols' : 2199,
+        'search_address' : 'https://jisho.org/search/'
+    },
+    
+    'hangul' : {
+        'script_name' : 'hangul',
+        'model_name':'./Models/hangul_model_v8_top5_96_eval.pth',
+        'array_path':'./Symbols/hangul_array.json',
+        'number_symbols' : 2028,
+        'search_address' : 'https://korean.dict.naver.com/koendict/#/search?query='
+    }
+}
+            
+settings = all_settings['hangul']
+
 layout = [
-            [sg.Push(), sg.Text("Select kanji(s)", key="Instructions"), sg.Push()], 
+            [sg.Push(), sg.Text("Select symbol(s)", key="Instructions"), sg.Push()], 
     
             [sg.Push(), 
              sg.Button("X", key="0", size=(3,0), font=("Helvetica", 50)), 
@@ -29,8 +49,8 @@ layout = [
              [sg.Push(), sg.Text("Currently selected : ", key="Selection", font=("Helvetica", 20)), sg.Push()], 
     
              [sg.Push(), 
-             sg.Button("Skip this kanji", key="Skip"), 
-             sg.Button("Retake this kanji", key="Retake"), 
+             sg.Button("Skip this symbol", key="Skip"), 
+             sg.Button("Retake this symbol", key="Retake"), 
              sg.Button("Cancel all selection", key="Cancel"),
              sg.Push()]
              ,
@@ -67,8 +87,8 @@ def windowToFront(window1):
     window.TKroot.focus_force()
 
 def loadModel() -> torch.nn.Module:
-    detectionModel = kanji_detector().to(device=device)
-    detectionModel.load_state_dict(torch.load('./Models/kanji_model_v7_top5_96_eval.pth'))
+    detectionModel = kanji_detector(settings['number_symbols']).to(device=device)
+    detectionModel.load_state_dict(torch.load(settings['model_name']))
     detectionModel(torch.rand((1,1,64,64)).float().to(device=device)) #Allocate memory in advance
     detectionModel = detectionModel.cpu() #Allocate memory in advance
     return detectionModel
@@ -128,11 +148,11 @@ def identifySymbol(top_k: int, images: Image) -> list:
         selections = (most_likely_indices).tolist()
         selections_probs = top_values.tolist()
 
-        kanjis = [num2kanji_dict[str(k)] for k in selections]
+        kanjis = [symbols_array[k] for k in selections]
         #print(kanjis)
 
         for i in range(len(selections)):
-            k = num2kanji_dict[str(selections[i])]
+            k = symbols_array[selections[i]]
             v = selections_probs[i]
 
             if maxValue < v:
@@ -208,7 +228,7 @@ def SingleCaptureLoop() -> list:
 
 kanjis = ""
 list_images_captured = []
-def identificationLoop(window1) -> bool:
+def identificationLoop(window1):
     global kanjis
     global current_selection
     global isRunning
@@ -216,7 +236,12 @@ def identificationLoop(window1) -> bool:
     kanji_selected = True
     setButtonsListInteractible(window,["Search"],False)
     
-    while len(list_images_captured) > 0:
+    while True:
+        
+        if len(list_images_captured) == 0:
+            kanji_selected = False
+            setButtonsListInteractible(window1,["Skip","Retake","0","1","2","3","4"],False)
+            setButtonsListInteractible(window1,["Search","Cancel"],True)
         
         setInstructions(window1,"Select the kanji you think you clicked on")
         
@@ -266,21 +291,21 @@ def identificationLoop(window1) -> bool:
             return
         
         if event == "Search" and len(kanjis) > 0:
-            webbrowser.open("https://jisho.org/search/"+kanjis, new=2, autoraise=True)
+            webbrowser.open(settings['search_address'] + kanjis, new=2, autoraise=True)
     
             
             
 # Create the window
-window = sg.Window("Kanji reader", layout, element_padding=(0,5))
+window = sg.Window("Computer symbol reader (by Hugo Palisson)", layout, element_padding=(0,5))
 window.finalize()
 setButtonsInteractible(window,False)
 setInstructions(window,"Program is loading, please wait")
 window.force_focus()
 event, values = window.Read(timeout = 100)
 
-num2kanji_dict = {}
-with open('num2kanji_dict.json', 'r') as f:
-  num2kanji_dict = json.load(f)
+symbols_array = []
+with open(settings['array_path'], mode='r', encoding='UTF-8') as f:
+    symbols_array = json.load(f)
 
 
 detectionModel = loadModel()
@@ -295,7 +320,7 @@ while isRunning:
         
     if isStartingCapture:
         resetButtonTexts(window)
-        setInstructions(window,"Select kanji(s) somewhere on your screen (Ctrl + Click)")
+        setInstructions(window,"Select " + settings['script_name'] + " symbol(s) somewhere on your screen (Ctrl + Click)")
         isStartingCapture = False
         setButtonsInteractible(window,False)
         
@@ -307,7 +332,7 @@ while isRunning:
         list_images_captured.extend(images_captured)
             
         setButtonsInteractible(window,True)
-        setInstructions(window,"Select the kanji you think you clicked on")
+        setInstructions(window,"Select the symbol you think you clicked on")
         wasCancelled = identificationLoop(window)
         if not isRunning:
             break
@@ -315,9 +340,11 @@ while isRunning:
         resetButtonTexts(window)
         setInstructions(window,"Capture complete")
         setButtonsListInteractible(window,["Skip","Retake","0","1","2","3","4"],False)
+        setButtonsListInteractible(window,["Search","Cancel"],True)
+        isStartingCapture = True
     
     if event == "Search":
-        webbrowser.open("https://jisho.org/search/"+kanjis, new=2, autoraise=True)
+        webbrowser.open(settings['search_address'] + kanjis, new=2, autoraise=True)
         
     if event == "Cancel":
             list_images_captured.clear()

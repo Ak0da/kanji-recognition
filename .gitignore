@@ -4,6 +4,9 @@ Training_set/
 *.jpg
 *.jpeg
 
+#Models once saved
+Models/
+
 #Data file with images in the shape of numpy arrays
 *.hdf5
 
