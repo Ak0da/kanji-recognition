@@ -20,7 +20,7 @@ all_settings = {
         'script_name' : 'kanji',
         'model_name':'./Models/kanji_model_v9_top5_96_eval.pth',
         'array_path':'./Symbols/kanji_array.json',
-        'number_symbols' : 2999,
+        'number_symbols' : 3149,
         'search_address' : 'https://jisho.org/search/'
     },
     
