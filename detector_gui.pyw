@@ -1,8 +1,12 @@
-import torch
+from torch import load, rand, no_grad, stack
+from torch.nn import Module
+from torch.nn.functional import softmax
+#import torch
 import PySimpleGUI as sg
 import re
 import webbrowser
 import json
+import sys
 
 from PIL import ImageGrab, Image
 from win32api import GetKeyState
@@ -32,8 +36,16 @@ all_settings = {
         'search_address' : 'https://korean.dict.naver.com/koendict/#/search?query='
     }
 }
-            
-settings = all_settings['kanji']
+
+if len(sys.argv) == 1:
+    settings = all_settings['kanji']
+elif sys.argv[1] in all_settings:
+    settings = all_settings[sys.argv[1]]
+else:
+    print("Invalid script argument; defaulting to kanji")
+    settings = all_settings['kanji']
+    
+scriptMode = settings['script_name'][0].upper() + settings['script_name'][1:].lower()
 
 sg.LOOK_AND_FEEL_TABLE['hangul'] = {'BACKGROUND': '#ff8FB2',
                                         'TEXT': '#FFFFFF',
@@ -109,10 +121,10 @@ def windowToFront(window1):
     window.TKroot.attributes('-topmost', False)
     window.TKroot.focus_force()
 
-def loadModel() -> torch.nn.Module:
+def loadModel() -> Module:
     detectionModel = kanji_detector(settings['number_symbols']).to(device=device)
-    detectionModel.load_state_dict(torch.load(settings['model_name']))
-    detectionModel(torch.rand((1,1,64,64)).float().to(device=device)) #Allocate memory in advance
+    detectionModel.load_state_dict(load(settings['model_name']))
+    detectionModel(rand((1,1,64,64)).float().to(device=device)) #Allocate memory in advance
     detectionModel = detectionModel.cpu() #Allocate memory in advance
     return detectionModel
         
@@ -153,7 +165,7 @@ def identifySymbol(top_k: int, images: Image) -> list:
     
     accumulator = {}
     
-    with torch.no_grad():
+    with no_grad():
         activeModel = detectionModel.to(device=device)
         activeModel.eval()
         
@@ -161,10 +173,10 @@ def identifySymbol(top_k: int, images: Image) -> list:
         maxValue = -9999999999.0
         
         list_tensors = [convert_tensor(image) for image in images]
-        tensor_images = torch.stack(list_tensors, dim=0)
+        tensor_images = stack(list_tensors, dim=0)
 
         results = activeModel(tensor_images.to(device=device))
-        results = torch.nn.functional.softmax(results, dim=-1)
+        results = softmax(results, dim=-1)
 
         results = results.sum(dim=0) #sums results for all batches
         top_values, most_likely_indices = results.squeeze().topk(k=results.size(-1),dim=0)
@@ -319,7 +331,7 @@ def identificationLoop(window1):
             
             
 # Create the window
-window = sg.Window("Computer symbol reader (by Hugo Palisson)", layout, element_padding=(0,5))
+window = sg.Window("Computer symbol reader by Hugo Palisson (" +scriptMode+ " mode)", layout, element_padding=(0,5))
 window.finalize()
 setButtonsInteractible(window,False)
 setInstructions(window,"Program is loading, please wait")

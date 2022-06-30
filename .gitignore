@@ -6,6 +6,11 @@ Training_set/
 
 #Models once saved
 Models/
+BuildModels/
+
+#Build artefacts
+build/
+dist/
 
 #Data file with images in the shape of numpy arrays
 *.hdf5
