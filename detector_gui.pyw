@@ -205,7 +205,7 @@ def identifySymbol(top_k: int, images: Image) -> list:
         
         return clean_list[:top_k]
         
-def MultiCaptureLoop() -> list:
+def MultiCaptureLoop(isAlreadyPressing=False) -> list:
     global isRunning
     
     state_left = isPressed(VK_LBUTTON)
@@ -221,10 +221,11 @@ def MultiCaptureLoop() -> list:
         a = isPressed(VK_LBUTTON)
         state_ctrl = isPressed(VK_CONTROL)
 
-        if a != state_left: # Button state changed
+        if (a != state_left) or isAlreadyPressing: # Button state changed
             state_left = a
 
-            if a and state_ctrl:
+            if (a and state_ctrl) or isAlreadyPressing:
+                isAlreadyPressing=False
                 isHolding = True
                 images = getCaptures()
                 images_captured.append(images) #Yes, list of lists
@@ -263,29 +264,38 @@ def SingleCaptureLoop() -> list:
 
 kanjis = ""
 list_images_captured = []
-def identificationLoop(window1):
+def identificationLoop(window1) -> bool:
     global kanjis
     global current_selection
     global isRunning
     
+    state_left = isPressed(VK_LBUTTON)
+    state_ctrl = isPressed(VK_CONTROL)
+    
     kanji_selected = True
     setButtonsListInteractible(window,["Search"],False)
+    list_empty = False
     
     while True:
         
-        if len(list_images_captured) == 0:
+        if len(list_images_captured) == 0 and kanji_selected:
             kanji_selected = False
+            list_empty = True
+            resetButtonTexts(window1)
+            setInstructions(window1,"Capture complete. Search or start another capture with Ctrl + Left click")
             setButtonsListInteractible(window1,["Skip","Retake","0","1","2","3","4"],False)
             setButtonsListInteractible(window1,["Search","Cancel"],True)
         
-        setInstructions(window1,"Select the symbol you think you clicked on")
+        if len(list_images_captured) > 0:
+            setInstructions(window1,"Select the symbol you think you clicked on")
         
         if kanji_selected:
             kanji_selected = False
             kanji_list = identifySymbol(len(button_kanji_keys), list_images_captured.pop(0))
             setButtonsSymbol(window1,kanji_list)
         
-        event, values = window1.Read()
+        event, values = window1.Read(timeout=20)
+        
         if event == sg.WIN_CLOSED:
             isRunning = False
             break
@@ -323,12 +333,21 @@ def identificationLoop(window1):
             list_images_captured.clear()
             kanjis = ""
             window1["Selection"].update("Currently selected : None")
-            return
+            return False
         
         if event == "Search" and len(kanjis) > 0:
             webbrowser.open(settings['search_address'] + kanjis, new=2, autoraise=True)
-    
-            
+        
+        state_ctrl = isPressed(VK_CONTROL)
+        a = isPressed(VK_LBUTTON)
+        if state_ctrl and state_left != a and a and list_empty:
+            list_images_captured.clear()
+            kanjis = ""
+            window1["Selection"].update("Currently selected : None")
+            return True #Starts a new capture immediatly when Ctrl+Click is clicked at the end of a capture.
+        
+        state_left = a
+    return False
             
 # Create the window
 window = sg.Window("Computer symbol reader by Hugo Palisson (" +scriptMode+ " mode)", layout, element_padding=(0,5))
@@ -347,6 +366,7 @@ detectionModel = loadModel()
 
 isRunning = True
 isStartingCapture = True
+isCaptureRestarted = False
 while isRunning:
     event, values = window.Read(timeout = 100)
     
@@ -359,7 +379,7 @@ while isRunning:
         isStartingCapture = False
         setButtonsInteractible(window,False)
         
-        images_captured = MultiCaptureLoop()
+        images_captured = MultiCaptureLoop(isCaptureRestarted)
         if not isRunning:
             break
         
@@ -368,7 +388,7 @@ while isRunning:
             
         setButtonsInteractible(window,True)
         setInstructions(window,"Select the symbol you think you clicked on")
-        wasCancelled = identificationLoop(window)
+        isCaptureRestarted = identificationLoop(window)
         if not isRunning:
             break
         
