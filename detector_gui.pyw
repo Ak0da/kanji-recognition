@@ -117,9 +117,10 @@ def setInstructions(window1,message:str):
     window1["Instructions"].update(message)
 
 def windowToFront(window1):
-    window.TKroot.attributes('-topmost', True)
-    window.TKroot.attributes('-topmost', False)
-    window.TKroot.focus_force()
+    window1.Normal()
+    window1.TKroot.attributes('-topmost', True)
+    window1.TKroot.attributes('-topmost', False)
+    window1.TKroot.focus_force()
 
 def loadModel() -> Module:
     detectionModel = kanji_detector(settings['number_symbols']).to(device=device)
@@ -282,7 +283,7 @@ def identificationLoop(window1) -> bool:
             kanji_selected = False
             list_empty = True
             resetButtonTexts(window1)
-            setInstructions(window1,"Capture complete. Search or start another capture with Ctrl + Left click")
+            setInstructions(window1,"Capture complete. Search or start another capture with Ctrl + Click")
             setButtonsListInteractible(window1,["Skip","Retake","0","1","2","3","4"],False)
             setButtonsListInteractible(window1,["Search","Cancel"],True)
         

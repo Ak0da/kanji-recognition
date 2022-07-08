@@ -1,5 +1,6 @@
 #Images created by the generator
 Image_set/
+Image_set_debug/
 Training_set/
 *.jpg
 *.jpeg
